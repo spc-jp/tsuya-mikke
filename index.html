@@ -611,7 +611,7 @@ input[type="file"]{ display:none; }
 <div id="app" style="display:none">
   <header class="header">
     <div class="header-left">
-      <div class="header-logo">艶<span>みっけ</span></div>
+      <div class="header-logo" onclick="goTop()" style="cursor:pointer;">艶<span>みっけ</span></div>
       <div class="header-sub">for Salon</div>
     </div>
     <button class="header-btn" onclick="openSettings()">⚙ サロン設定</button>
@@ -793,14 +793,28 @@ function startApp(){
   top.style.opacity = '0';
   setTimeout(()=>{
     top.style.display = 'none';
-    // 期限・パスワードチェックは既に実行済みなので
-    // app が表示されていればそのまま、pw-screen が表示中であればそちらへ
     if(document.getElementById('app').style.display !== 'none'){
-      // すでにappが表示されている（無料期間中）→ そのまま
+      // 無料期間中 → フェードイン実行
+      initFadeIn();
     } else {
+      // 4月以降 → パスワード画面へ
       document.getElementById('pw-screen').style.display = 'flex';
     }
   }, 350);
+}
+
+// ヘッダーロゴ → トップ画面に戻る
+function goTop(){
+  const top = document.getElementById('top-screen');
+  top.style.opacity = '0';
+  top.style.display = 'flex';
+  top.style.transition = 'opacity 0.35s ease';
+  // カードのvisibleをリセット
+  ['banner','c1','c2','c3','c4','gen-btn'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.remove('visible');
+  });
+  setTimeout(()=>{ top.style.opacity='1'; }, 10);
 }
 
 // ═══ 期限チェック ═══
