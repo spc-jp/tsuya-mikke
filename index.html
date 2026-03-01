@@ -269,6 +269,74 @@ html,body{
 }
 .photo-btn-remove:hover{ color:#C0553A; background:#FFF3F0; border-color:#F5C4BC; }
 
+
+/* ─── スキャニングアニメーション ─── */
+.photo-area{ position:relative; overflow:hidden; }
+
+.scan-overlay{
+  display:none;
+  position:absolute; inset:0; z-index:5;
+  border-radius:10px;
+  background:rgba(201,149,108,0.06);
+  pointer-events:none;
+}
+.scan-overlay.active{ display:block; }
+
+/* スキャンライン */
+.scan-line{
+  position:absolute; left:0; right:0; height:3px;
+  background:linear-gradient(to right,
+    transparent 0%,
+    rgba(201,149,108,0.4) 20%,
+    rgba(201,149,108,0.9) 50%,
+    rgba(255,220,180,1) 55%,
+    rgba(201,149,108,0.9) 60%,
+    rgba(201,149,108,0.4) 80%,
+    transparent 100%
+  );
+  box-shadow:0 0 12px rgba(201,149,108,0.8), 0 0 24px rgba(201,149,108,0.4);
+  animation:scanMove 1.6s ease-in-out forwards;
+  top:0;
+}
+@keyframes scanMove{
+  0%   { top:0%; opacity:0; }
+  5%   { opacity:1; }
+  95%  { opacity:1; }
+  100% { top:100%; opacity:0; }
+}
+
+/* コーナーマーカー */
+.scan-corner{
+  position:absolute; width:18px; height:18px;
+  border-color:var(--rg); border-style:solid;
+  opacity:0; animation:cornerFade 1.6s ease forwards;
+}
+.scan-corner.tl{ top:8px; left:8px;  border-width:2px 0 0 2px; }
+.scan-corner.tr{ top:8px; right:8px; border-width:2px 2px 0 0; }
+.scan-corner.bl{ bottom:8px; left:8px;  border-width:0 0 2px 2px; }
+.scan-corner.br{ bottom:8px; right:8px; border-width:0 2px 2px 0; }
+@keyframes cornerFade{
+  0%  { opacity:0; }
+  15% { opacity:1; }
+  85% { opacity:1; }
+  100%{ opacity:0; }
+}
+
+/* スキャン完了テキスト */
+.scan-complete{
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  background:rgba(201,149,108,0.9);
+  color:#fff; font-size:0.65rem; font-weight:700;
+  letter-spacing:0.18em; padding:0.25rem 0.8rem;
+  border-radius:20px;
+  opacity:0; animation:completePop 0.4s ease 1.5s forwards;
+  white-space:nowrap;
+}
+@keyframes completePop{
+  0%  { opacity:0; transform:translateX(-50%) scale(0.8); }
+  100%{ opacity:1; transform:translateX(-50%) scale(1); }
+}
+
 /* ─── テキストエリア ─── */
 .hint-area{
   width:100%; border:1.5px solid var(--border); border-radius:var(--radius-sm);
@@ -636,6 +704,15 @@ input[type="file"]{ display:none; }
           <div class="photo-text">写真をタップして選ぶ<small>ファイル選択またはカメラ撮影</small></div>
         </div>
         <img id="photo-preview" style="display:none" alt="施術写真" />
+        <!-- スキャンオーバーレイ -->
+        <div class="scan-overlay" id="scan-overlay">
+          <div class="scan-line"></div>
+          <div class="scan-corner tl"></div>
+          <div class="scan-corner tr"></div>
+          <div class="scan-corner bl"></div>
+          <div class="scan-corner br"></div>
+          <div class="scan-complete">SCAN COMPLETE ✦</div>
+        </div>
       </div>
       <div class="photo-btns">
         <button class="photo-btn" onclick="event.stopPropagation();triggerFileSelect()">🖼 ファイルから選ぶ</button>
@@ -881,7 +958,38 @@ function setPhoto(url){
   const img=document.getElementById('photo-preview'); img.src=url; img.style.display='block';
   document.getElementById('photo-placeholder').style.display='none';
   document.getElementById('photo-area').classList.add('has-image');
-  document.getElementById('remove-btn').style.display='block';
+  document.getElementById('remove-btn').style.display='none'; // スキャン中は非表示
+
+  // スキャンアニメーション起動
+  startScan();
+}
+
+function startScan(){
+  const overlay = document.getElementById('scan-overlay');
+  // 古いアニメーションをリセット
+  overlay.classList.remove('active');
+  overlay.innerHTML = '';
+  void overlay.offsetWidth; // reflow
+
+  overlay.innerHTML = `
+    <div class="scan-line"></div>
+    <div class="scan-corner tl"></div>
+    <div class="scan-corner tr"></div>
+    <div class="scan-corner bl"></div>
+    <div class="scan-corner br"></div>
+    <div class="scan-complete">SCAN COMPLETE ✦</div>
+  `;
+  overlay.classList.add('active');
+
+  // 2秒後にオーバーレイ消去・ボタン表示
+  setTimeout(()=>{
+    overlay.classList.remove('active');
+    document.getElementById('remove-btn').style.display='block';
+    // パーティクルバースト
+    const area = document.getElementById('photo-area');
+    const rect = area.getBoundingClientRect();
+    burstParticles(rect.left + rect.width/2, rect.top + rect.height/2);
+  }, 2000);
 }
 function removePhoto(){
   photoDataUrl=null;
