@@ -951,7 +951,26 @@ function triggerFileSelect(){ document.getElementById('file-input').click(); }
 function triggerCamera(){ document.getElementById('camera-input').click(); }
 function onFileSelected(e){
   const file=e.target.files[0]; if(!file) return;
-  const r=new FileReader(); r.onload=ev=>setPhoto(ev.target.result); r.readAsDataURL(file); e.target.value='';
+  const r=new FileReader();
+  r.onload=ev=>{
+    // ─── canvas圧縮 ───
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=800; // 長辺800pxに制限
+      let w=img.width, h=img.height;
+      if(w>h){ if(w>MAX){h=Math.round(h*MAX/w);w=MAX;} }
+      else    { if(h>MAX){w=Math.round(w*MAX/h);h=MAX;} }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      // JPEG品質72%で出力（8MB→約80〜120KB）
+      const compressed=canvas.toDataURL('image/jpeg',0.72);
+      setPhoto(compressed);
+    };
+    img.src=ev.target.result;
+  };
+  r.readAsDataURL(file);
+  e.target.value='';
 }
 function setPhoto(url){
   photoDataUrl=url;
