@@ -8,23 +8,63 @@
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* ピンク・ホワイト基調のガーリーなカラーパレット */
-  --cream:    #FFF0F5;   /* ラベンダーブラッシュ（背景） */
+  /* ピンク・ホワイト基調のガーリーなカラーパレット（デフォルト） */
+  --cream:    #FFF0F5;   
   --white:    #FFFFFF;
   --offwhite: #FFF5F7;
-  --rg:       #FF8BA7;   /* メインの可愛いピンク */
+  --rg:       #FF8BA7;   
   --rg-light: #FFC6D3;
-  --rg-dark:  #E05777;   /* アクセント用の濃いピンク */
-  --rg-pale:  #FFEBF0;   /* ペールピンク */
-  --brown:    #6B5256;   /* 赤みのあるブラウン（文字色） */
+  --rg-dark:  #E05777;   
+  --rg-pale:  #FFEBF0;   
+  --brown:    #6B5256;   
   --brown-mid:#9E7A81;
   --gray:     #B0969A;
   --gray-lt:  #D9C5C8;
   --border:   #FFD6E0;
-  --shadow:   rgba(255, 139, 167, 0.15); /* ピンクのシャドウ */
-  --radius:   24px;      /* より丸みを帯びた角 */
+  --shadow:   rgba(255, 139, 167, 0.15); 
+  --radius:   24px;      
   --radius-sm:14px;
 }
+/* テーマ：ブラウン系（ナチュラル） */
+body.theme-brown {
+  --cream:    #FDF8F5;
+  --offwhite: #FAF0EB;
+  --rg:       #A67B5B;
+  --rg-light: #D2B48C;
+  --rg-dark:  #6F4E37;
+  --rg-pale:  #F3E8E0;
+  --brown:    #4A3B32;
+  --brown-mid:#8A7366;
+  --border:   #E6D5C9;
+  --shadow:   rgba(166, 123, 91, 0.15);
+}
+/* テーマ：ブルー系（清潔感） */
+body.theme-blue {
+  --cream:    #F0F8FF;
+  --offwhite: #F5FAFF;
+  --rg:       #6CB4EE;
+  --rg-light: #A1D6FF;
+  --rg-dark:  #4682B4;
+  --rg-pale:  #E6F3FF;
+  --brown:    #334E68;
+  --brown-mid:#627D98;
+  --border:   #BCE0FD;
+  --shadow:   rgba(108, 180, 238, 0.15);
+}
+/* テーマ：グリーン系（オーガニック） */
+body.theme-green {
+  --cream:    #F0FFF4;
+  --offwhite: #F5FFFA;
+  --rg:       #81C784;
+  --rg-light: #A5D6A7;
+  --rg-dark:  #388E3C;
+  --rg-pale:  #E8F5E9;
+  --brown:    #3E4E3F;
+  --brown-mid:#708271;
+  --border:   #C8E6C9;
+  --shadow:   rgba(129, 199, 132, 0.15);
+}
+
 *{ box-sizing:border-box; margin:0; padding:0; }
 html,body{
   min-height:100vh;
@@ -118,7 +158,7 @@ html,body{
 
 /* ─── 設定パネル ─── */
 #settings-panel{
-  display:none; position:fixed; inset:0; z-index:50;
+  display:none; position:fixed; inset:0; z-index:150;
   background:rgba(107,82,86,0.4); backdrop-filter:blur(6px);
   align-items:center; justify-content:center;
 }
@@ -126,7 +166,7 @@ html,body{
 .settings-box{
   background:var(--white); border:2px solid var(--border);
   border-radius:var(--radius); padding:2rem 2.2rem;
-  width:min(420px,92vw);
+  width:min(420px,92vw); max-height: 90vh; overflow-y: auto;
   box-shadow:0 16px 50px rgba(255,139,167,0.2);
   animation:fadeUp 0.28s ease forwards;
 }
@@ -137,12 +177,13 @@ html,body{
 }
 .settings-row{ display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.9rem; }
 .settings-row label{ font-size:0.75rem; color:var(--gray); letter-spacing:0.1em; font-weight:500; }
-.settings-row input{
+.settings-row input, .settings-row select {
   border:2px solid var(--border); border-radius:var(--radius-sm);
   padding:0.7rem 0.95rem; color:var(--brown); font-size:0.88rem; outline:none;
   background:var(--offwhite); transition:all 0.2s; font-family:'M PLUS Rounded 1c',sans-serif;
 }
-.settings-row input:focus{ border-color:var(--rg); background:var(--white); box-shadow:0 0 0 4px rgba(255,139,167,0.15); }
+.settings-row select { appearance: none; cursor: pointer; }
+.settings-row input:focus, .settings-row select:focus { border-color:var(--rg); background:var(--white); box-shadow:0 0 0 4px rgba(255,139,167,0.15); }
 .settings-row input::placeholder{ color:var(--gray-lt); }
 .settings-row .hint{ font-size:0.67rem; color:var(--gray-lt); }
 .settings-footer{ display:flex; gap:0.8rem; margin-top:1.4rem; }
@@ -161,6 +202,57 @@ html,body{
 }
 .btn-cancel:hover{ border-color:var(--rg-light); color:var(--brown-mid); }
 
+/* デモデータ・クリアボタン（薄文字） */
+.settings-dev {
+  margin-top: 1.5rem; text-align: center; font-size: 0.7rem; color: var(--gray-lt);
+  display: flex; justify-content: center; gap: 0.8rem;
+}
+.settings-dev span { cursor: pointer; transition: color 0.2s; }
+.settings-dev span:hover { color: var(--gray); }
+
+/* ─── 使い方パネル ─── */
+#howto-panel {
+  display:none; position:fixed; inset:0; z-index:150;
+  background:rgba(107,82,86,0.4); backdrop-filter:blur(6px);
+  align-items:center; justify-content:center;
+}
+#howto-panel.open { display:flex; }
+.howto-box {
+  background:var(--white); border:2px solid var(--border);
+  border-radius:var(--radius); padding:2rem 2.2rem;
+  width:min(520px,92vw); max-height: 85vh; overflow-y: auto;
+  box-shadow:0 16px 50px rgba(255,139,167,0.2);
+  animation:fadeUp 0.28s ease forwards;
+}
+.howto-box h3 {
+  font-size:1.1rem; font-weight:700; color:var(--brown);
+  margin-bottom:1.4rem; padding-bottom:0.8rem;
+  border-bottom:2px dashed var(--border); letter-spacing:0.08em;
+}
+.howto-content h4 {
+  font-size: 0.9rem; color: var(--rg-dark); margin-bottom: 0.6rem; margin-top: 1.4rem;
+  letter-spacing: 0.05em;
+}
+.howto-content h4:first-child { margin-top: 0; }
+.howto-content p {
+  font-size: 0.8rem; color: var(--brown-mid); line-height: 1.7; margin-bottom: 1rem;
+}
+.howto-content ul {
+  list-style: none; padding-left: 0; margin-bottom: 1rem;
+}
+.howto-content li {
+  font-size: 0.8rem; color: var(--brown-mid); line-height: 1.6; margin-bottom: 0.8rem;
+  position: relative; padding-left: 1.4rem;
+}
+.howto-content li::before {
+  content: '🎀'; position: absolute; left: 0; top: 0.1rem; font-size: 0.7rem;
+}
+.howto-content strong { color: var(--rg-dark); }
+.howto-note {
+  font-size: 0.75rem !important; color: var(--gray) !important; background: var(--offwhite);
+  padding: 0.8rem 1rem; border-radius: 8px; margin-top: 1.2rem !important; margin-bottom: 0 !important;
+}
+
 /* ─── ヘッダー ─── */
 .header{
   position:sticky; top:0; z-index:10;
@@ -171,7 +263,7 @@ html,body{
   display:flex; align-items:center; justify-content:space-between;
   box-shadow:0 2px 20px var(--shadow);
 }
-.header-left{ display:flex; align-items:baseline; gap:0.8rem; }
+.header-left{ display:flex; align-items:baseline; gap:0.6rem; flex-wrap: wrap; }
 .header-logo{
   font-family:'M PLUS Rounded 1c',sans-serif;
   font-weight:700; font-size:1.45rem; letter-spacing:0.08em; color:var(--brown);
@@ -185,12 +277,21 @@ html,body{
   font-style:italic; color:var(--rg); font-size:0.75rem; letter-spacing:0.18em;
   font-weight:600;
 }
+.header-right { display:flex; align-items:center; gap:1.2rem; }
+.header-howto {
+  font-size: 0.75rem; color: var(--brown-mid); cursor: pointer;
+  border-bottom: 1px dashed var(--gray-lt);
+  transition: all 0.2s; letter-spacing: 0.05em; font-weight: 700;
+  display: flex; align-items: center; gap: 0.2rem;
+}
+.header-howto:hover { color: var(--rg-dark); border-color: var(--rg-dark); transform: translateY(-1px); }
+
 .header-btn{
   background:var(--white); border:2px solid var(--rg-light);
   border-radius:20px; color:var(--rg-dark);
   padding:0.45rem 1rem; font-size:0.75rem; cursor:pointer;
   letter-spacing:0.1em; transition:all 0.2s; font-family:'M PLUS Rounded 1c',sans-serif;
-  font-weight:700;
+  font-weight:700; white-space: nowrap;
 }
 .header-btn:hover{ background:var(--rg-pale); transform:scale(1.05); }
 
@@ -659,6 +760,30 @@ input[type="file"]{ display:none; }
   </div>
 </div>
 
+<!-- 使い方パネル -->
+<div id="howto-panel">
+  <div class="howto-box">
+    <h3>📖 艶みっけの使い方 🎀</h3>
+    <div class="howto-content">
+      <h4>🎯 このツールの目的</h4>
+      <p>サロンでの施術写真から、Instagramにそのまま投稿できる魅力的な文章とハッシュタグを、AIが自動で作成します。<br>毎日のSNS更新にかかる時間を大幅に短縮し、より多くのお客様にサロンの魅力を届けることを目的としています。</p>
+      
+      <h4>✨ 使い方（5つのステップ）</h4>
+      <ul>
+        <li><strong>1. 施術写真を選ぶ</strong><br>「施術写真 🎀」のエリアをタップして、投稿したい写真を選びます（その場でカメラ撮影も可能です）。</li>
+        <li><strong>2. 施術メニューを選ぶ</strong><br>「施術メニュー 💖」から、お客様に提供したメニューをタップします（複数選択OKです）。</li>
+        <li><strong>3. 投稿のポイントを入力（任意）</strong><br>「投稿のポイント ✏️」に、カラーのこだわりやお客様のご要望などを自由に記入します。書かなくてもAIが写真から判断して良い感じに作成します。</li>
+        <li><strong>4. 投稿トーンを選ぶ</strong><br>お店の雰囲気やターゲットに合わせて、文章のトーン（親しみ・上品・プロ感・ポップ）を選びます。</li>
+        <li><strong>5. 生成＆コピー</strong><br>「Instagram投稿文を生成する ✨」ボタンを押すと文章が完成します。あとは「📋 コピーする」ボタンを押して、ご自身のInstagramに貼り付けるだけです！</li>
+      </ul>
+      <p class="howto-note">※事前に右上の「⚙ サロン設定」から、お店の名前や固定ハッシュタグを設定しておくと、毎回の入力の手間が省けて便利です🎀</p>
+    </div>
+    <div class="settings-footer">
+      <button class="btn-cancel" onclick="closeHowto()" style="width:100%">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <!-- 設定パネル -->
 <div id="settings-panel">
   <div class="settings-box">
@@ -680,10 +805,30 @@ input[type="file"]{ display:none; }
       <input type="text" id="set-tags" placeholder="例：#美容室大阪 #サロン" />
       <span class="hint">毎回の投稿文末に自動追加されます</span>
     </div>
+    
+    <!-- 新規追加：色合い設定 -->
+    <div class="settings-row">
+      <label>色合い設定（アプリのテーマカラー）</label>
+      <select id="set-theme">
+        <option value="pink">ピンク系（デフォルト）</option>
+        <option value="brown">茶系（ナチュラル・落ち着き）</option>
+        <option value="blue">ブルー系（清潔感・爽やか）</option>
+        <option value="green">グリーン系（オーガニック・癒やし）</option>
+      </select>
+    </div>
+
     <div class="settings-footer">
       <button class="btn-save" onclick="saveSettings()">保存する ♡</button>
       <button class="btn-cancel" onclick="closeSettings()">キャンセル</button>
     </div>
+
+    <!-- 新規追加：デモデータ / クリア -->
+    <div class="settings-dev">
+      <span onclick="loadDemoSettings()">デモデータ</span>
+      <span>|</span>
+      <span onclick="clearSettings()">クリア</span>
+    </div>
+
   </div>
 </div>
 
@@ -694,7 +839,10 @@ input[type="file"]{ display:none; }
       <div class="header-logo" onclick="goTop()" style="cursor:pointer;">艶<span>みっけ</span></div>
       <div class="header-sub">for Salon 🎀</div>
     </div>
-    <button class="header-btn" onclick="openSettings()">⚙ サロン設定</button>
+    <div class="header-right">
+      <div class="header-howto" onclick="openHowto()">使い方 📖</div>
+      <button class="header-btn" onclick="openSettings()">⚙ サロン設定</button>
+    </div>
   </header>
 
   <div class="main">
@@ -805,9 +953,23 @@ input[type="file"]{ display:none; }
   const canvas = document.getElementById('particle-canvas');
   const ctx = canvas.getContext('2d');
   let W, H;
-  // ピンク系・白・ゴールドに色を変更
-  const COLORS = ['#FF8BA7','#FFC6D3','#FF6B8B','#FFFFFF','#FFD700','#FFA6C9'];
+  
+  // テーマ別のカラーパレット
+  const THEME_COLORS = {
+    pink:  ['#FF8BA7','#FFC6D3','#FF6B8B','#FFFFFF','#FFD700','#FFA6C9'],
+    brown: ['#A67B5B','#D2B48C','#C29B7F','#FFFFFF','#FFD700','#E6D5C9'],
+    blue:  ['#6CB4EE','#A1D6FF','#89CFF0','#FFFFFF','#FFD700','#BCE0FD'],
+    green: ['#81C784','#A5D6A7','#66BB6A','#FFFFFF','#FFD700','#C8E6C9']
+  };
+  let currentColors = THEME_COLORS['pink'];
   const particles = [];
+
+  // 外部からテーマカラーを変更できるようにする
+  window.updateParticleColors = function(theme) {
+    currentColors = THEME_COLORS[theme] || THEME_COLORS['pink'];
+    // 既存のパーティクルの色も徐々に変わるようにランダムで再設定
+    particles.forEach(p => { p.color = currentColors[Math.floor(Math.random()*currentColors.length)]; });
+  };
 
   function resize(){ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   resize(); window.addEventListener('resize', resize);
@@ -822,7 +984,7 @@ input[type="file"]{ display:none; }
       this.fade = Math.random()*0.004+0.0015;
       this.vx = (Math.random()-0.5)*0.3;
       this.vy = -(Math.random()*0.4+0.08);
-      this.color = COLORS[Math.floor(Math.random()*COLORS.length)];
+      this.color = currentColors[Math.floor(Math.random()*currentColors.length)];
       this.tw = Math.random()*Math.PI*2;
       this.ts = Math.random()*0.04+0.015;
       this.star = Math.random()>0.5; // 星の確率を少し上げる
@@ -935,6 +1097,10 @@ function checkPw(){
 }
 document.getElementById('pw-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkPw(); });
 
+// ═══ 使い方パネル ═══
+function openHowto() { document.getElementById('howto-panel').classList.add('open'); }
+function closeHowto() { document.getElementById('howto-panel').classList.remove('open'); }
+
 // ═══ 設定 ═══
 function openSettings(){ loadSettingsToForm(); document.getElementById('settings-panel').classList.add('open'); }
 function closeSettings(){ document.getElementById('settings-panel').classList.remove('open'); }
@@ -943,9 +1109,11 @@ function saveSettings(){
     salon:document.getElementById('set-salon').value.trim(),
     staff:document.getElementById('set-staff').value.trim(),
     ig:document.getElementById('set-ig').value.trim(),
-    tags:document.getElementById('set-tags').value.trim()
+    tags:document.getElementById('set-tags').value.trim(),
+    theme:document.getElementById('set-theme').value
   };
   localStorage.setItem('tsuyamikke_settings',JSON.stringify(s));
+  applyTheme(s.theme);
   closeSettings();
 }
 function loadSettingsToForm(){
@@ -955,8 +1123,44 @@ function loadSettingsToForm(){
   document.getElementById('set-staff').value=s.staff||'';
   document.getElementById('set-ig').value=s.ig||'';
   document.getElementById('set-tags').value=s.tags||'';
+  document.getElementById('set-theme').value=s.theme||'pink';
 }
 function getSettings(){ const raw=localStorage.getItem('tsuyamikke_settings'); return raw?JSON.parse(raw):{}; }
+
+// テーマの適用
+function applyTheme(theme) {
+  document.body.classList.remove('theme-brown', 'theme-blue', 'theme-green');
+  if (theme && theme !== 'pink') {
+    document.body.classList.add('theme-' + theme);
+  }
+  if (window.updateParticleColors) {
+    window.updateParticleColors(theme || 'pink');
+  }
+}
+
+// ページ読み込み時にテーマを反映
+(function initTheme(){
+  const s = getSettings();
+  applyTheme(s.theme || 'pink');
+})();
+
+// デモデータの読み込み
+function loadDemoSettings() {
+  document.getElementById('set-salon').value = 'Hair Salon ROSE';
+  document.getElementById('set-staff').value = '田中さやか';
+  document.getElementById('set-ig').value = '@rose_hairsalon';
+  document.getElementById('set-tags').value = '#美容室大阪 #ヘアサロン #艶髪';
+  document.getElementById('set-theme').value = 'pink';
+}
+
+// フォームのクリア
+function clearSettings() {
+  document.getElementById('set-salon').value = '';
+  document.getElementById('set-staff').value = '';
+  document.getElementById('set-ig').value = '';
+  document.getElementById('set-tags').value = '';
+  document.getElementById('set-theme').value = 'pink';
+}
 
 // ═══ 写真 ═══
 let photoDataUrl=null;
