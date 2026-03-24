@@ -3,7 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>艶みっけ 🎀</title>
+<title>艶みっけ｜美容室・サロン専用 Instagram投稿文 自動生成ツール</title>
+<meta name="description" content="施術写真を撮るだけで、Instagram投稿文が完成。ハッシュタグも文章もAIが自動生成。サロンオーナーの投稿作業をぐっと楽に。">
+
+<!-- OGP（SNSシェア用） -->
+<meta property="og:title" content="艶みっけ｜美容室・サロン専用 Instagram投稿文 自動生成ツール">
+<meta property="og:description" content="施術写真を撮るだけで、Instagram投稿文が完成。ハッシュタグも文章もAIが自動生成。サロンオーナーの投稿作業をぐっと楽に。">
+<meta property="og:image" content="https://spc-jp.github.io/tsuya-mikke/ogp.jpg">
+<meta property="og:url" content="https://spc-jp.github.io/tsuya-mikke/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="艶みっけ｜Production SPC">
+
+<!-- Twitter Card（X用） -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="艶みっけ｜美容室・サロン専用 Instagram投稿文 自動生成ツール">
+<meta name="twitter:description" content="施術写真を撮るだけで、Instagram投稿文が完成。ハッシュタグも文章もAIが自動生成。">
+<meta name="twitter:image" content="https://spc-jp.github.io/tsuya-mikke/ogp.jpg">
+
 <!-- 丸みのあるガーリーなフォントに変更 -->
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -940,7 +956,7 @@ input[type="file"]{ display:none; }
 
   <div class="footer">
     艶みっけ — Instagram Post Generator for Salon 🎀<br>
-    Powered by AI &nbsp;|&nbsp; © 2026 Smile Plus Consulting
+    Powered by SPC
   </div>
 </div>
 
@@ -1123,7 +1139,7 @@ function loadSettingsToForm(){
   document.getElementById('set-staff').value=s.staff||'';
   document.getElementById('set-ig').value=s.ig||'';
   document.getElementById('set-tags').value=s.tags||'';
-  document.getElementById('set-theme').value=s.theme||'pink';
+  document.getElementById('set-theme').value=s.theme||'brown';
 }
 function getSettings(){ const raw=localStorage.getItem('tsuyamikke_settings'); return raw?JSON.parse(raw):{}; }
 
@@ -1141,7 +1157,7 @@ function applyTheme(theme) {
 // ページ読み込み時にテーマを反映
 (function initTheme(){
   const s = getSettings();
-  applyTheme(s.theme || 'pink');
+  applyTheme(s.theme || 'brown');
 })();
 
 // デモデータの読み込み
