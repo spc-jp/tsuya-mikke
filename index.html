@@ -863,12 +863,10 @@ input[type="file"]{ display:none; }
 
   <div class="main">
 
-    <div class="trial-banner" id="banner">
-      <div class="trial-text">
-        <strong>🎁 無料体験期間中</strong>
-        2026年3月31日まで無料でご利用いただけます
+    <div class="trial-banner state-free" id="banner">
+      <div id="banner-content">
+        <!-- JS で動的に書き換え -->
       </div>
-      <div class="trial-badge">FREE ♡</div>
     </div>
 
     <!-- 写真 -->
@@ -1062,8 +1060,8 @@ function startApp(){
   setTimeout(()=>{
     top.style.display = 'none';
     if(document.getElementById('app').style.display !== 'none'){
-      // 無料期間中 → フェードイン実行
       initFadeIn();
+      updateBanner();
     } else {
       // 4月以降 → パスワード画面へ
       document.getElementById('pw-screen').style.display = 'flex';
@@ -1085,33 +1083,95 @@ function goTop(){
   setTimeout(()=>{ top.style.opacity='1'; }, 10);
 }
 
-// ═══ 期限チェック ═══
-(function(){
-  const TRIAL_END=new Date('2026-04-01T00:00:00+09:00');
-  const now=new Date();
-  if(now < TRIAL_END){
-    // 無料期間中 → top-screenを通ってからappへ（appを先に準備しておく）
-    document.getElementById('pw-screen').style.display='none';
-    document.getElementById('app').style.display='block';
-    // top-screenは表示したまま（startApp()で消える）
-  }
-  // 4月1日以降はtop→pw-screenへ遷移
-})();
+// ═══ 回数制限トライアル管理 ═══
+const PASS = 'tsuya2025';
+const STRIPE_URL = 'https://buy.stripe.com/5kQ00i5ey2IR4KHdZicV208';
+const MAX_TRIAL = 3;
+const LS_KEY = 'tsuyamikke_trial';
 
-// ═══ パスワード ═══
-const PASS='tsuya2025';
-function checkPw(){
-  if(document.getElementById('pw-input').value===PASS){
-    document.getElementById('pw-screen').style.display='none';
-    document.getElementById('app').style.display='block';
-    loadSettingsToForm();
-    setTimeout(initFadeIn,100);
+function getTrialCount(){
+  const raw = localStorage.getItem(LS_KEY);
+  return raw ? parseInt(raw) : 0;
+}
+function isPaid(){
+  return localStorage.getItem('tsuyamikke_paid') === '1';
+}
+function incrementTrial(){
+  const n = getTrialCount() + 1;
+  localStorage.setItem(LS_KEY, String(n));
+  return n;
+}
+
+// バナーを状態に応じて更新
+function updateBanner(){
+  const banner  = document.getElementById('banner');
+  const content = document.getElementById('banner-content');
+  const genBtn  = document.getElementById('gen-btn');
+  if(!banner || !content) return;
+
+  if(isPaid()){
+    // 購入済み → バナー非表示
+    banner.className = 'trial-banner state-paid visible';
+    return;
+  }
+
+  const used = getTrialCount();
+  const left = MAX_TRIAL - used;
+
+  if(left > 0){
+    // 残り回数あり
+    const msgs = ['今なら3回まで無料でお試しいただけます（登録不要）', '無料体験 残り2回（全3回）', '無料体験 残り1回（全3回）'];
+    banner.className = 'trial-banner state-free visible';
+    content.innerHTML = `
+      <div>
+        <div class="trial-text">
+          <strong class="gold">🎁 ${msgs[used]}</strong>
+        </div>
+        <div class="trial-pw-wrap">
+          <input class="trial-pw-input" id="trial-pw-input" type="password" placeholder="購入済みの方はPWを入力" />
+          <button class="trial-pw-btn" onclick="checkTrialPw()">解除</button>
+        </div>
+      </div>
+      <div class="trial-badge">残り${left}回</div>
+    `;
+    if(genBtn) genBtn.disabled = false;
   } else {
-    document.getElementById('pw-error').style.display='block';
-    document.getElementById('pw-input').value='';
+    // 使い切り
+    banner.className = 'trial-banner state-end visible';
+    content.innerHTML = `
+      <div>
+        <div class="trial-text">
+          <strong class="red">⚠️ 無料体験が終了しました</strong>
+          引き続きご利用の方はご購入ください
+        </div>
+        <div class="trial-pw-wrap">
+          <input class="trial-pw-input" id="trial-pw-input" type="password" placeholder="購入済みの方はPWを入力" />
+          <button class="trial-pw-btn" onclick="checkTrialPw()">解除</button>
+        </div>
+      </div>
+      <a class="trial-buy-btn" href="${STRIPE_URL}" target="_blank">ご購入はこちら →</a>
+    `;
+    if(genBtn) genBtn.disabled = true;
   }
 }
-document.getElementById('pw-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkPw(); });
+
+// バナー内パスワード解除
+function checkTrialPw(){
+  const input = document.getElementById('trial-pw-input');
+  if(!input) return;
+  if(input.value.trim() === PASS){
+    localStorage.setItem('tsuyamikke_paid','1');
+    updateBanner();
+  } else {
+    input.style.borderColor = '#E05777';
+    input.value = '';
+    setTimeout(()=>{ input.style.borderColor = ''; }, 1500);
+  }
+}
+
+// ─── 起動時：常にappを表示（pw画面なし） ───
+document.getElementById('pw-screen').style.display='none';
+document.getElementById('app').style.display='block';
 
 // ═══ 使い方パネル ═══
 function openHowto() { document.getElementById('howto-panel').classList.add('open'); }
@@ -1262,6 +1322,9 @@ const WORKER_URL='https://tsuya-mikke.yymmatsu.workers.dev/chat';
 
 // ═══ 生成（API連携版） ═══
 async function generate(){
+  // 回数チェック
+  if(!isPaid() && getTrialCount() >= MAX_TRIAL){ updateBanner(); return; }
+
   const btn=document.getElementById('gen-btn');
   const rect=btn.getBoundingClientRect();
   burstParticles(rect.left+rect.width/2, rect.top+rect.height/2);
@@ -1308,6 +1371,8 @@ async function generate(){
     document.getElementById('result-text').textContent=post;
     document.getElementById('result-card').classList.add('show');
     document.getElementById('result-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+    // 回数カウントアップ & バナー更新
+    if(!isPaid()){ incrementTrial(); updateBanner(); }
   }catch(e){
     document.getElementById('result-text').textContent='⚠ エラーが発生しました。\n'+e.message;
     document.getElementById('result-card').classList.add('show');
